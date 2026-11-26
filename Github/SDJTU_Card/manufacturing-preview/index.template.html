@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>校园通行牌 · 亚克力三维预览</title>
+<style>
+:root {
+  color-scheme: light;
+  font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
+  color: #253d46;
+  background: #eef4f6;
+  --muted: #617783;
+  --line: #c9d6dc;
+  --accent: #365d66;
+  --surface: #ffffff;
+  --atlas-palette: saturate(1.72) contrast(1.04);
+  --radius: 10px;
+  --header-height: clamp(68px, 5.4vw, 90px);
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: wait; opacity: .55; }
+button:focus-visible, input:focus-visible, .stage:focus-visible {
+  outline: 2px solid #4b7884;
+  outline-offset: 3px;
+}
+[hidden] { display: none !important; }
+.header {
+  position: absolute;
+  inset: 0 0 auto;
+  pointer-events: none;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: var(--header-height);
+  padding: 12px clamp(18px, 2.5vw, 42px);
+  background: linear-gradient(180deg, #f9fcfdf7 0%, #f7fbfcea 30%, #f3f9fab5 67%, #f3f9fa00 100%);
+}
+.title {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(12px, 1.8vw, 30px);
+  padding-left: clamp(12px, 1.25vw, 22px);
+  border-left: 4px solid var(--accent);
+}
+.title h1 {
+  margin: 0;
+  font-size: clamp(22px, 2.4vw, 39px);
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.header-actions { pointer-events: auto; }
+.export {
+  min-height: 43px;
+  padding: 0 clamp(16px, 2.1vw, 37px);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: #fff;
+  font-size: clamp(14px, 1.2vw, 20px);
+  white-space: nowrap;
+}
+.export:enabled:hover { background: #294d56; border-color: #294d56; }
+.workspace { position: relative; isolation: isolate; }
+.viewer {
+  position: relative;
+  min-height: max(590px, 100svh);
+  overflow: hidden;
+  isolation: isolate;
+  background: #e7f0f4;
+}
+.atlas-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: var(--atlas-palette);
+  pointer-events: none;
+}
+.stage {
+  --model-center: .60;
+  position: absolute;
+  inset: 0;
+  cursor: grab;
+  touch-action: none;
+}
+.stage:active { cursor: grabbing; }
+.stage:focus-visible { outline-offset: -4px; }
+.stage canvas { display: block; width: 100%; height: 100%; }
+.compass {
+  position: absolute;
+  top: calc(var(--header-height) + clamp(16px, 2.1vw, 34px));
+  right: clamp(22px, 2.6vw, 44px);
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  color: #4a6873;
+  font-size: 12px;
+  pointer-events: none;
+}
+.compass::after {
+  content: "";
+  width: 16px;
+  height: 22px;
+  background: linear-gradient(90deg, #8daab4 50%, #4a6873 50%);
+  clip-path: polygon(50% 0, 100% 100%, 50% 76%, 0 100%);
+}
+.map-credit {
+  position: absolute;
+  z-index: 1;
+  right: 10px;
+  bottom: 4px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: #f3f7f4e8;
+  color: #304f59;
+  font-size: 10px;
+  line-height: 1.1;
+  text-decoration: none;
+}
+.map-credit:hover { text-decoration: underline; }
+.viewer-toolbar {
+  position: absolute;
+  inset-inline: 12px;
+  bottom: clamp(26px, 5.7vh, 55px);
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.viewer-toolbar button { pointer-events: auto; }
+.segments { display: flex; gap: 10px; }
+.segments button {
+  min-height: 40px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  background: #ffffffdc;
+  color: #294650;
+  font-size: clamp(14px, 1.11vw, 18px);
+  white-space: nowrap;
+}
+.segments button:hover { background: #f0f6f8; border-color: #8caab5; }
+.segments button[aria-pressed="true"] { background: #e7f1f4; border-color: #5c7b85; color: #1d404c; }
+#views button {
+  min-width: clamp(72px, 7.5vw, 123px);
+  border-color: #8da5af;
+  border-radius: 999px;
+}
+#views button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.settings {
+  position: absolute;
+  z-index: 1;
+  top: calc(var(--header-height) + clamp(12px, 1.7vw, 28px));
+  left: clamp(16px, 1.72vw, 29px);
+  width: clamp(196px, 16vw, 248px);
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 13px;
+  padding: clamp(14px, 1.3vw, 22px);
+  border: 1px solid #b9cdd5;
+  border-radius: 8px;
+  background: #f6fafbdc;
+}
+.settings h2 { margin: 0; font-size: 16px; line-height: 1.25; }
+.field-row { display: grid; gap: 6px; font-size: 13px; }
+#serial-label, #color-label { color: var(--muted); }
+.serial-fields { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 5fr); gap: 8px; }
+.serial-fields input { text-align: center; font-variant-numeric: tabular-nums; }
+.serial-fields input[aria-invalid="true"] { border-color: #983c30; }
+input[type="text"] {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: #253d46;
+}
+#colors { gap: 8px; }
+#colors button { flex: 1; min-height: 34px; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding-inline: 8px; border-radius: var(--radius); }
+.color-swatch { width: 12px; height: 12px; flex: none; border-radius: 50%; }
+.color-swatch.yellow { background: #e7c350; }
+.color-swatch.blue { background: #70b3dd; }
+.status { margin: 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.status.error { color: #983c30; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (max-width: 820px) {
+  .viewer { min-height: calc(var(--header-height) + clamp(345px, 57svh, 620px)); }
+  .stage { --model-center: .5; }
+  .viewer-toolbar { bottom: 17px; }
+  .settings { position: relative; top: auto; left: auto; margin: 14px auto 0; }
+  .workspace { padding-bottom: 16px; }
+}
+@media (max-width: 560px) {
+  .header { padding: 10px 12px; gap: 10px; }
+  .title { display: block; padding-left: 9px; border-left-width: 3px; }
+  .title h1 { font-size: clamp(17px, 4.6vw, 22px); }
+  .export { min-height: 40px; padding-inline: 10px; font-size: 13px; }
+  #views { gap: clamp(4px, 2vw, 10px); }
+  #views button { min-width: clamp(56px, 19vw, 82px); padding-inline: 9px; }
+  .compass { top: calc(var(--header-height) + 12px); right: 15px; }
+}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="title">
+    <h1>校园通行牌</h1>
+  </div>
+  <div class="header-actions">
+    <button class="export" id="manufacturing-export" type="button" disabled>导出加工包</button>
+  </div>
+</header>
+<main class="workspace">
+  <section class="viewer" aria-labelledby="view-title">
+    <img id="atlas-map" class="atlas-map" aria-hidden="true" alt="" src="OFFLINE_ATLAS_SRC">
+    <div id="stage" class="stage" tabindex="0" aria-label="亚克力板三维模型"></div>
+    <span class="compass" aria-hidden="true">N</span>
+    <a class="map-credit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a>
+    <div class="viewer-toolbar">
+      <h2 id="view-title" class="visually-hidden">三维视图</h2>
+      <div class="segments" id="views" role="group" aria-label="三维视角">
+        <button type="button" data-view="angle" aria-pressed="true">斜视</button>
+        <button type="button" data-view="front" aria-pressed="false">正面</button>
+        <button type="button" data-view="side" aria-pressed="false">侧视</button>
+        <button type="button" data-view="back" aria-pressed="false">背面</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="settings" aria-labelledby="settings-title">
+    <h2 id="settings-title">版面</h2>
+    <div class="field-row">
+      <span id="serial-label">编号</span>
+      <div class="serial-fields" role="group" aria-labelledby="serial-label">
+        <input id="serial-prefix" type="text" value="" maxlength="2" pattern="[A-Z]{2}" autocomplete="off" autocapitalize="characters" spellcheck="false" required aria-label="前两位字母">
+        <input id="serial-digits" type="text" value="" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="off" spellcheck="false" required aria-label="后六位数字">
+      </div>
+    </div>
+    <div class="field-row">
+      <span id="color-label">牌面颜色</span>
+      <div class="segments" id="colors" role="group" aria-labelledby="color-label">
+        <button type="button" data-color="yellow" aria-pressed="true"><span class="color-swatch yellow" aria-hidden="true"></span>黄色</button>
+        <button type="button" data-color="blue" aria-pressed="false"><span class="color-swatch blue" aria-hidden="true"></span>蓝色</button>
+      </div>
+    </div>
+    <p id="status" class="status" role="status" hidden></p>
+  </section>
+</main>
+
+<!-- APP_BUNDLE -->
+</body>
+</html>
